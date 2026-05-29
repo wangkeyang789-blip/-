@@ -96,8 +96,6 @@
 </head>
 <body>
 
-<!-- 背景音乐：单独写，不要把button塞进去 -->
-<audio id="bgm" src="bgm.mp3" loop>
 <button class="music-btn" id="musicToggle">暂停音乐</button>
 
 <div class="title">镜子不会说谎</div>
@@ -144,6 +142,8 @@
 </div>
 <div class="page-indicator" id="indicator">第 1 页 / 共 4 页</div>
 
+<audio id="bgm" src="bgm.mp3" loop>
+
 <script>
     let current = 1;
     const total = 4;
@@ -153,9 +153,8 @@
     let isPlaying = true;
     bgm.volume = 0.3;
 
-    // 自动播放（浏览器限制时需用户点一下页面）
     window.addEventListener('load', () => {
-        bgm.play().catch(e => console.log("自动播放被浏览器限制，需点击页面"));
+        bgm.play().catch(e => console.log("浏览器限制自动播放，点击页面即可播放"));
     });
 
     musicToggle.addEventListener('click', () => {
@@ -169,7 +168,6 @@
         isPlaying = !isPlaying;
     });
 
-    // 翻页音效
     function playFlipSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -195,10 +193,8 @@
         document.getElementById('next').disabled = current === total;
         document.getElementById('indicator').innerText = `第 ${current} 页 / 共 ${total}`;
 
-        // 翻页自动回顶
         window.scrollTo(0, 0);
 
-        // 最后一页停止音乐
         if (num === total) {
             bgm.pause();
             isPlaying = false;
