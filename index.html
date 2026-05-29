@@ -142,7 +142,7 @@
 </div>
 <div class="page-indicator" id="indicator">第 1 页 / 共 4 页</div>
 
-<audio id="bgm" src="bgm.mp3" loop>
+<audio id="bgm" src="bgm.mp3" loop></audio>
 
 <script>
     let current = 1;
@@ -150,24 +150,86 @@
 
     const bgm = document.getElementById('bgm');
     const musicToggle = document.getElementById('musicToggle');
-    let isPlaying = true;
+    let isPlaying = true;           // 音乐应该处于播放状态
+    let audioStarted = false;       // 是否已经解锁播放
+    
+    // 记录滚动是否已经触发过音乐
+    let scrollTriggered = false;
+
     bgm.volume = 0.3;
 
+    // 尝试播放音乐的通用函数
+    function tryPlayMusic() {
+        if (audioStarted) return true;
+        
+        audioStarted = true;
+        
+        bgm.play().then(() => {
+            if (isPlaying) {
+                // 正常播放
+                musicToggle.textContent = '暂停音乐';
+            } else {
+                bgm.pause();
+                musicToggle.textContent = '播放音乐';
+            }
+        }).catch(e => {
+            console.log("播放失败", e);
+            audioStarted = false;
+            return false;
+        });
+        
+        // 移除滚动监听，只触发一次
+        window.removeEventListener('wheel', onUserScroll);
+        window.removeEventListener('touchmove', onUserScroll);
+        
+        return true;
+    }
+
+    // 滚动事件处理函数
+    function onUserScroll() {
+        if (!scrollTriggered) {
+            scrollTriggered = true;
+            tryPlayMusic();
+        }
+    }
+
+    // 监听滚动事件来触发音乐播放
+    window.addEventListener('wheel', onUserScroll);
+    window.addEventListener('touchmove', onUserScroll);
+
+    // 页面加载时尝试播放（万一浏览器允许自动播放）
     window.addEventListener('load', () => {
-        bgm.play().catch(e => console.log("浏览器限制自动播放，点击页面即可播放"));
+        bgm.play().then(() => {
+            audioStarted = true;
+            if (!isPlaying) {
+                bgm.pause();
+                musicToggle.textContent = '播放音乐';
+            }
+            // 如果自动播放成功，滚动监听就不需要了
+            window.removeEventListener('wheel', onUserScroll);
+            window.removeEventListener('touchmove', onUserScroll);
+        }).catch(e => {
+            console.log("等待用户滚动页面以播放音乐");
+        });
     });
 
+    // 音乐按钮点击事件
     musicToggle.addEventListener('click', () => {
         if (isPlaying) {
             bgm.pause();
             musicToggle.textContent = '播放音乐';
         } else {
-            bgm.play();
+            if (!audioStarted) {
+                tryPlayMusic();
+            } else {
+                bgm.play().catch(e => console.log);
+            }
             musicToggle.textContent = '暂停音乐';
         }
         isPlaying = !isPlaying;
     });
 
+    // 翻页音效
     function playFlipSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -184,6 +246,7 @@
         } catch (e) {}
     }
 
+    // 页面切换
     function showPage(num) {
         playFlipSound();
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
