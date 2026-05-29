@@ -166,6 +166,7 @@
         document.getElementById('prev').disabled = current === 1;
         document.getElementById('next').disabled = current === total;
         document.getElementById('indicator').innerText = `第 ${current} 页 / 共 ${total}`;
+        window.scrollTo(0, 0);
     }
 
     document.getElementById('next').addEventListener('click', () => showPage(current + 1));
