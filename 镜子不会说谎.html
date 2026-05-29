@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>镜子不会说谎 - By WKY</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0b0b10;
+            color: #e0e0e8;
+            font-family: "Microsoft YaHei", sans-serif;
+            font-size: 18px;
+            line-height: 2.1;
+            padding: 60px 24px;
+            max-width: 860px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        .title {
+            text-align: center;
+            font-size: 30px;
+            color: #f0f0f8;
+            letter-spacing: 4px;
+            margin-bottom: 12px;
+        }
+        .author {
+            text-align: center;
+            color: #888;
+            font-size: 16px;
+            margin-bottom: 60px;
+        }
+
+        /* 翻书3D动画 */
+        .page {
+            display: none;
+            transform-origin: left center;
+            transform: rotateY(90deg);
+            opacity: 0;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+        .page.active {
+            display: block;
+            transform: rotateY(0deg);
+            opacity: 1;
+        }
+
+        p {
+            margin-bottom: 24px;
+            text-align: justify;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 80px;
+        }
+        button {
+            background: transparent;
+            color: #a8a8b8;
+            border: 1px solid #555;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        button:hover:not(:disabled) {
+            border-color: #fff;
+            color: #fff;
+        }
+        button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .page-indicator {
+            text-align: center;
+            color: #777;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="title">镜子不会说谎</div>
+<div class="author">By WKY</div>
+
+<!-- 第1页 -->
+<div class="page active" id="p1">
+    <p>你第一次注意到不对劲，是洗澡的时候。你没有站稳，摔在地上。地板很硬，你感觉后脑在流血。你撑着站起来，撩起头发，对着卫生间的镜子扭头查看伤口，视线偶然落到旁边洗发水瓶——标签朝里。你记得你都是标签朝外放，除非室友用过。</p>
+    <p>但你没有室友。</p>
+    <p>后来是水杯。有一天早上你发现杯壁上有一个浅浅的唇印，颜色像你包里那支口红，但你近期似乎没有用过口红。你洗了杯子，可能是你半夜起来喝了水，忘了。你从来没有半夜起来喝水的习惯。但你可能有了。你不知道。</p>
+    <p>后来是门。你记得自己锁了门，但有一天早上推门的时候，锁是开的。你检查了锁孔，没有撬过的痕迹。可能是你忘了。</p>
+    <p>事情不是每天都发生的。它总是在你快要忘记的时候回来。你加班到很晚，回家倒头就睡，第二天早上门是开着的，你不记得你有没有关门。你出差两周，回来发现桌子上有水渍，也许是之前留下的，只是两周没有干。你感冒吃药，睡得昏天暗地，醒来的时候枕头旁边有一根很长很长的棕色头发，你的头发应该是黑色的，也许是你以前染过的某根头发。</p>
+</div>
+
+<!-- 第2页 -->
+<div class="page" id="p2">
+    <p>有一天夜里，你被一个声音吵醒。是墙里面的，咔、咔、咔，像有人在墙壁中间走路，在你永远够不到的地方走来走去。你贴着墙听，那声音停了。你离开墙，那声音又响了。你搬到客厅睡，墙里没有声音了，天花板里有声音。你搬到厨房睡，天花板里没有声音了，冰箱里有声音。你搬到卫生间睡，冰箱里没有声音了，马桶里有声音。你回到卧室，没有声音了，还是因为你睡着了？</p>
+    <p>你去朋友家住几天，请人维修了屋子，更换了很多东西，回来时你睡得很好。第二天早上，屋子里很安静，枕头旁边没有头发，门也是锁着的。你泡了一杯茶，坐在阳台上晒太阳。</p>
+    <p>直到你翻手机相册，滑到最底部，有一张多出来的照片。凌晨 3 点 22 分，几乎全黑。你把亮度调到最高，看见你的脸，闭着眼睛，表情平静。</p>
+    <p>你终于装了监控。你不敢看，但你装了。你每天醒来第一件事就是打开录像，看见黑暗中的你躺在床上，闭着眼睛，表情平静。你看着屏幕里的自己，觉得陌生，但你拖动进度条，一切都很正常，似乎。</p>
+    <p>有一天你醒来后感到头很沉，不是没睡好的那种，更像是睡得太深，像是永远醒不过来。</p>
+    <p>你打开监控，凌晨 1 点 22 分，你坐了起来。你下了床，光着脚，走到卫生间。监控中只能拍到你的脸，它应该是对着卫生间的镜子。你站在那里，一动不动。然后你走回房间，躺下，闭眼。你为什么要看镜子？你不知道。</p>
+    <p>每个人都会压力大，每个人都有可能梦游。你不敢去医院，你怕确诊，更怕没确诊。你把摄像头拆了，扔进了垃圾桶。你告诉自己，不知道比知道好。你不知道自己有没有再起来过。你只是每天偶尔继续发觉一些事。你不用再记录了，你不用再怀疑了。你知道是你自己做的。你相信是你自己做的。</p>
+</div>
+
+<!-- 第3页 -->
+<div class="page" id="p3">
+    <p>但你开始回避镜子。</p>
+    <p>你可以理解健忘，可以理解神经衰弱，可以理解梦游。但你不理解为什么，你梦游时要去看向镜子——镜子里有什么？你总是忍不住想起这件事，你想不到答案。你想不到答案，你就会忍不住想。渐渐地你开始害怕镜子，你把家里的小镜子都扔掉了，只剩卫生间一面大的。你洗脸的时候不抬头。你弯着腰，脸对着水龙头，水声很大。你闭着眼睛，把洗面奶搓出泡沫，涂在脸上，冲掉。你拿毛巾的时候不敢睁眼。你把脸擦干，把毛巾挂回去，眼睛一直盯着洗手台。你没有看镜子一眼。你走出卫生间，关上门。你不知道自己在怕什么，你只知道怕。</p>
+    <p>水杯可以是自己喝的，门可以是自己开的，头发可以是自己掉的，照片可以是自己拍的，墙里的声音可以是水管，镜子呢？镜子里的那个人，你没法说那不是你。你在看她的时候，她也在看你。你们是同时的。你不能说“可能是我看错了”，因为你看的就是自己。你不能说“可能是记性不好”，因为这是现在，不是过去。你不能说“可能是梦游”，因为你醒着。你醒着，你站着，你看着，你无法解释，你只能承认。</p>
+    <p>你低着头，洗脸，刷牙，洗手。日复一日。你没有看过那面镜子。你不知道镜子里的人是什么样子。你只能想象。你想象她和你一样低着头。你想象她和你一样在回避。你想象她也怕看你。</p>
+    <p>你好像知道你为什么怕看镜子了。你怕抬头的时候，看到镜子里的人不是你。你怕看到她的表情和你不一样。你怕忍不住数清她脸上的痣少了或者多了一颗。你怕看到她在你低头的时候做了别的事。之前种种异常的小事，你都能找到理由说服自己。唯独镜子，镜子不会说谎。但只要你不看，你就还能告诉自己，镜里始终只是正常的倒影，什么都没变，什么都不曾发生。</p>
+    <p>直到有一天，你走进卫生间。你弯腰洗脸，洗到一半，突然觉得有些不对。你说不上来。你没有抬头。你闭着眼睛，摸毛巾。你擦脸。你把毛巾挂回去。你准备走出去。你停住了。你没有抬头。你低着头，站在洗手台前。你告诉自己，走出去就好。不用抬头。不用看。你站了很久，一动不动。水龙头没关，水声还在响，你看见水在洗手池里打着细小的漩涡。</p>
+    <p>你抬起头。</p>
+    <p>你看着镜子。</p>
+</div>
+
+<!-- 第4页 -->
+<div class="page" id="p4">
+    <p>镜子里什么都没有，旁边的洗发水瓶一直标签朝外。</p>
+    <p>地板很硬，后脑的血流空了。</p>
+    <p>——2026.5.5 2:22AM</p>
+</div>
+
+<div class="nav">
+    <button id="prev">上一页</button>
+    <button id="next">下一页</button>
+</div>
+<div class="page-indicator" id="indicator">第 1 页 / 共 4 页</div>
+
+<script>
+    let current = 1;
+    const total = 4;
+
+    // 用浏览器原生音频生成翻书沙沙声，100%不依赖外部资源
+    function playFlipSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferSize = ctx.sampleRate * 0.1; // 0.1秒的声音
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // 生成白噪音模拟沙沙声
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.2; // 降低音量避免刺耳
+            }
+            
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start();
+        } catch (e) {}
+    }
+
+    function showPage(num) {
+        playFlipSound(); // 每次翻页播放音效
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(`p${num}`).classList.add('active');
+        current = num;
+        document.getElementById('prev').disabled = current === 1;
+        document.getElementById('next').disabled = current === total;
+        document.getElementById('indicator').innerText = `第 ${current} 页 / 共 ${total}`;
+    }
+
+    document.getElementById('next').addEventListener('click', () => showPage(current + 1));
+    document.getElementById('prev').addEventListener('click', () => showPage(current - 1));
+
+    showPage(1);
+</script>
+</body>
+</html>
