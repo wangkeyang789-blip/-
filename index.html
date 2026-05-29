@@ -82,9 +82,27 @@
             margin-top: 30px;
             font-size: 14px;
         }
+        /* 音乐控制按钮 */
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            border: 1px solid #555;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 999;
+        }
     </style>
 </head>
 <body>
+
+<!-- 背景音乐：默认循环、自动播放 -->
+<audio id="bgm" src="bgm.mp3" loop>
+<button class="music-btn" id="musicToggle">暂停音乐</button>
 
 <div class="title">镜子不会说谎</div>
 <div class="author">By WKY</div>
@@ -138,19 +156,38 @@
     let current = 1;
     const total = 4;
 
-    // 用浏览器原生音频生成翻书沙沙声，100%不依赖外部资源
+    // 背景音乐控制
+    const bgm = document.getElementById('bgm');
+    const musicToggle = document.getElementById('musicToggle');
+    let isPlaying = true;
+    bgm.volume = 0.3;
+
+    // 页面加载后自动播放
+    window.addEventListener('load', () => {
+        bgm.play().catch(e => console.log("浏览器限制自动播放，需点击页面后播放"));
+    });
+
+    musicToggle.addEventListener('click', () => {
+        if (isPlaying) {
+            bgm.pause();
+            musicToggle.textContent = '播放音乐';
+        } else {
+            bgm.play();
+            musicToggle.textContent = '暂停音乐';
+        }
+        isPlaying = !isPlaying;
+    });
+
+    // 翻页音效
     function playFlipSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const bufferSize = ctx.sampleRate * 0.1; // 0.1秒的声音
+            const bufferSize = ctx.sampleRate * 0.1;
             const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
             const data = buffer.getChannelData(0);
-            
-            // 生成白噪音模拟沙沙声
             for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.2; // 降低音量避免刺耳
+                data[i] = (Math.random() * 2 - 1) * 0.2;
             }
-            
             const source = ctx.createBufferSource();
             source.buffer = buffer;
             source.connect(ctx.destination);
@@ -159,14 +196,22 @@
     }
 
     function showPage(num) {
-        playFlipSound(); // 每次翻页播放音效
+        playFlipSound();
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(`p${num}`).classList.add('active');
         current = num;
         document.getElementById('prev').disabled = current === 1;
         document.getElementById('next').disabled = current === total;
         document.getElementById('indicator').innerText = `第 ${current} 页 / 共 ${total}`;
+
         window.scrollTo(0, 0);
+
+        // 关键：翻到最后一页立刻停止音乐
+        if (num === total) {
+            bgm.pause();
+            isPlaying = false;
+            musicToggle.textContent = '播放音乐';
+        }
     }
 
     document.getElementById('next').addEventListener('click', () => showPage(current + 1));
