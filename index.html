@@ -256,14 +256,93 @@
     const startBtn = document.getElementById('startBtn');
     const bgm = document.getElementById('bgm');
     const musicToggle = document.getElementById('musicToggle');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
     
     let isPlaying = true;
     let audioStarted = false;
+    let currentPage = 1;
+    const totalPages = 4;
 
-    // 如果找不到 bgm.mp3，静默失败不报错
+    // 设置音乐音量
     if (bgm) {
         bgm.volume = 0.3;
     }
+
+    // 显示指定页面
+    function showPage(pageNum) {
+        // 边界检查
+        if (pageNum < 1 || pageNum > totalPages) return;
+        
+        // 隐藏所有页面
+        for (let i = 1; i <= totalPages; i++) {
+            const page = document.getElementById(`p${i}`);
+            if (page) page.classList.remove('active');
+        }
+        
+        // 显示当前页面
+        const currentPageEl = document.getElementById(`p${pageNum}`);
+        if (currentPageEl) currentPageEl.classList.add('active');
+        
+        // 更新当前页码
+        currentPage = pageNum;
+        
+        // 更新按钮状态
+        if (prevBtn) prevBtn.disabled = currentPage === 1;
+        if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+        
+        // 更新指示器
+        const indicator = document.getElementById('indicator');
+        if (indicator) indicator.innerText = `第 ${currentPage} 页 / 共 ${totalPages}`;
+        
+        // 滚动到顶部
+        window.scrollTo(0, 0);
+        
+        // 翻到最后一页时停止音乐
+        if (pageNum === totalPages && bgm && isPlaying) {
+            bgm.pause();
+            isPlaying = false;
+            if (musicToggle) musicToggle.textContent = '播放音乐';
+        }
+        
+        // 翻页音效
+        playFlipSound();
+    }
+
+    // 翻页音效
+    function playFlipSound() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferSize = ctx.sampleRate * 0.1;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.2;
+            }
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start();
+        } catch (e) {}
+    }
+
+    // 下一页
+    function nextPage() {
+        if (currentPage < totalPages) {
+            showPage(currentPage + 1);
+        }
+    }
+
+    // 上一页
+    function prevPage() {
+        if (currentPage > 1) {
+            showPage(currentPage - 1);
+        }
+    }
+
+    // 绑定翻页按钮事件
+    if (nextBtn) nextBtn.addEventListener('click', nextPage);
+    if (prevBtn) prevBtn.addEventListener('click', prevPage);
 
     // 开始阅读的函数
     function startReading() {
@@ -272,6 +351,7 @@
             bgm.play().then(() => {
                 audioStarted = true;
                 if (musicToggle) musicToggle.textContent = '暂停音乐';
+                isPlaying = true;
             }).catch(e => {
                 console.log("播放失败", e);
             });
@@ -283,14 +363,14 @@
         // 显示正文
         mainContent.style.display = 'block';
         
-        // 300ms 后移除封面 DOM（等待动画完成）
+        // 初始化第一页
+        showPage(1);
+        
+        // 1秒后移除封面 DOM（等待动画完成）
         setTimeout(() => {
             cover.style.display = 'none';
         }, 1000);
     }
-
-    // 点击开始按钮
-    startBtn.addEventListener('click', startReading);
 
     // 音乐按钮控制
     if (musicToggle) {
@@ -311,65 +391,7 @@
         });
     }
 
-    // 翻页音效
-    function playFlipSound() {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const bufferSize = ctx.sampleRate * 0.1;
-            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.2;
-            }
-            const source = ctx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(ctx.destination);
-            source.start();
-        } catch (e) {}
-    }
-
-    // 页面切换逻辑
-    let current = 1;
-    const total = 4;
-
-    function showPage(num) {
-        playFlipSound();
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(`p${num}`).classList.add('active');
-        current = num;
-        const prevBtn = document.getElementById('prev');
-        const nextBtn = document.getElementById('next');
-        if (prevBtn) prevBtn.disabled = current === 1;
-        if (nextBtn) nextBtn.disabled = current === total;
-        const indicator = document.getElementById('indicator');
-        if (indicator) indicator.innerText = `第 ${current} 页 / 共 ${total}`;
-
-        window.scrollTo(0, 0);
-
-        if (num === total && bgm) {
-            bgm.pause();
-            isPlaying = false;
-            if (musicToggle) musicToggle.textContent = '播放音乐';
-        }
-    }
-
-    const prevBtn = document.getElementById('prev');
-    const nextBtn = document.getElementById('next');
-    if (prevBtn) prevBtn.addEventListener('click', () => showPage(current + 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => showPage(current - 1));
-
-    // 初始化页面（等正文显示后再调用）
-    function initPages() {
-        showPage(1);
-    }
-    
-    // 修改 startReading，加入页面初始化
-    const originalStartReading = startReading;
-    startReading = function() {
-        originalStartReading();
-        initPages();
-    };
-    startBtn.removeEventListener('click', startReading);
+    // 绑定开始按钮
     startBtn.addEventListener('click', startReading);
 </script>
 
