@@ -34,8 +34,6 @@
             font-size: 16px;
             margin-bottom: 60px;
         }
-
-        /* 翻书3D动画 */
         .page {
             display: none;
             transform-origin: left center;
@@ -48,7 +46,6 @@
             transform: rotateY(0deg);
             opacity: 1;
         }
-
         p {
             margin-bottom: 24px;
             text-align: justify;
@@ -82,7 +79,6 @@
             margin-top: 30px;
             font-size: 14px;
         }
-        /* 音乐控制按钮 */
         .music-btn {
             position: fixed;
             top: 20px;
@@ -100,14 +96,13 @@
 </head>
 <body>
 
-<!-- 背景音乐：默认循环、自动播放 -->
+<!-- 背景音乐：单独写，不要把button塞进去 -->
 <audio id="bgm" src="bgm.mp3" loop>
 <button class="music-btn" id="musicToggle">暂停音乐</button>
 
 <div class="title">镜子不会说谎</div>
 <div class="author">By WKY</div>
 
-<!-- 第1页 -->
 <div class="page active" id="p1">
     <p>你第一次注意到不对劲，是洗澡的时候。你没有站稳，摔在地上。地板很硬，你感觉后脑在流血。你撑着站起来，撩起头发，对着卫生间的镜子扭头查看伤口，视线偶然落到旁边洗发水瓶——标签朝里。你记得你都是标签朝外放，除非室友用过。</p>
     <p>但你没有室友。</p>
@@ -116,7 +111,6 @@
     <p>事情不是每天都发生的。它总是在你快要忘记的时候回来。你加班到很晚，回家倒头就睡，第二天早上门是开着的，你不记得你有没有关门。你出差两周，回来发现桌子上有水渍，也许是之前留下的，只是两周没有干。你感冒吃药，睡得昏天暗地，醒来的时候枕头旁边有一根很长很长的棕色头发，你的头发应该是黑色的，也许是你以前染过的某根头发。</p>
 </div>
 
-<!-- 第2页 -->
 <div class="page" id="p2">
     <p>有一天夜里，你被一个声音吵醒。是墙里面的，咔、咔、咔，像有人在墙壁中间走路，在你永远够不到的地方走来走去。你贴着墙听，那声音停了。你离开墙，那声音又响了。你搬到客厅睡，墙里没有声音了，天花板里有声音。你搬到厨房睡，天花板里没有声音了，冰箱里有声音。你搬到卫生间睡，冰箱里没有声音了，马桶里有声音。你回到卧室，没有声音了，还是因为你睡着了？</p>
     <p>你去朋友家住几天，请人维修了屋子，更换了很多东西，回来时你睡得很好。第二天早上，屋子里很安静，枕头旁边没有头发，门也是锁着的。你泡了一杯茶，坐在阳台上晒太阳。</p>
@@ -127,7 +121,6 @@
     <p>每个人都会压力大，每个人都有可能梦游。你不敢去医院，你怕确诊，更怕没确诊。你把摄像头拆了，扔进了垃圾桶。你告诉自己，不知道比知道好。你不知道自己有没有再起来过。你只是每天偶尔继续发觉一些事。你不用再记录了，你不用再怀疑了。你知道是你自己做的。你相信是你自己做的。</p>
 </div>
 
-<!-- 第3页 -->
 <div class="page" id="p3">
     <p>但你开始回避镜子。</p>
     <p>你可以理解健忘，可以理解神经衰弱，可以理解梦游。但你不理解为什么，你梦游时要去看向镜子——镜子里有什么？你总是忍不住想起这件事，你想不到答案。你想不到答案，你就会忍不住想。渐渐地你开始害怕镜子，你把家里的小镜子都扔掉了，只剩卫生间一面大的。你洗脸的时候不抬头。你弯着腰，脸对着水龙头，水声很大。你闭着眼睛，把洗面奶搓出泡沫，涂在脸上，冲掉。你拿毛巾的时候不敢睁眼。你把脸擦干，把毛巾挂回去，眼睛一直盯着洗手台。你没有看镜子一眼。你走出卫生间，关上门。你不知道自己在怕什么，你只知道怕。</p>
@@ -139,7 +132,6 @@
     <p>你看着镜子。</p>
 </div>
 
-<!-- 第4页 -->
 <div class="page" id="p4">
     <p>镜子里什么都没有，旁边的洗发水瓶一直标签朝外。</p>
     <p>地板很硬，后脑的血流空了。</p>
@@ -156,15 +148,14 @@
     let current = 1;
     const total = 4;
 
-    // 背景音乐控制
     const bgm = document.getElementById('bgm');
     const musicToggle = document.getElementById('musicToggle');
     let isPlaying = true;
     bgm.volume = 0.3;
 
-    // 页面加载后自动播放
+    // 自动播放（浏览器限制时需用户点一下页面）
     window.addEventListener('load', () => {
-        bgm.play().catch(e => console.log("浏览器限制自动播放，需点击页面后播放"));
+        bgm.play().catch(e => console.log("自动播放被浏览器限制，需点击页面"));
     });
 
     musicToggle.addEventListener('click', () => {
@@ -204,9 +195,10 @@
         document.getElementById('next').disabled = current === total;
         document.getElementById('indicator').innerText = `第 ${current} 页 / 共 ${total}`;
 
+        // 翻页自动回顶
         window.scrollTo(0, 0);
 
-        // 关键：翻到最后一页立刻停止音乐
+        // 最后一页停止音乐
         if (num === total) {
             bgm.pause();
             isPlaying = false;
@@ -219,5 +211,6 @@
 
     showPage(1);
 </script>
+
 </body>
 </html>
