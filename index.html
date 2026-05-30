@@ -166,6 +166,10 @@
             opacity: 0.3;
             cursor: not-allowed;
         }
+        /* 下一页按钮默认显示，在最后一页隐藏 */
+        #next {
+            display: inline-block;
+        }
         /* 回到首页按钮默认隐藏，只在最后一页显示 */
         #homeBtn {
             display: none;
@@ -295,12 +299,32 @@
     let volumeFadeTimer = null;         // 音量淡入定时器
     let highVolumeTimer = null;         // 高音量持续时间定时器
     
-    // ★ 新增：标记最后一页的“特殊效果”是否已经触发过
+    // 标记最后一页的“特殊效果”是否已经触发过
     let lastPageEffectTriggered = false;
 
     // 设置音乐默认音量
     if (bgm) {
         bgm.volume = 0.3;
+    }
+
+    // 更新导航按钮显示（根据当前页面）
+    function updateNavButtons() {
+        if (currentPage === totalPages) {
+            // 最后一页：隐藏下一页按钮，显示回到首页按钮
+            if (nextBtn) nextBtn.style.display = 'none';
+            if (homeBtn) homeBtn.style.display = 'inline-block';
+        } else {
+            // 非最后一页：显示下一页按钮，隐藏回到首页按钮
+            if (nextBtn) nextBtn.style.display = 'inline-block';
+            if (homeBtn) homeBtn.style.display = 'none';
+        }
+        
+        // 上一页按钮的禁用状态
+        if (prevBtn) prevBtn.disabled = (currentPage === 1);
+        // 下一页按钮的禁用状态（仅当非最后一页时考虑）
+        if (nextBtn && currentPage !== totalPages) {
+            nextBtn.disabled = false;
+        }
     }
 
     // 音量淡入/淡出函数
@@ -349,19 +373,15 @@
         
         currentPage = pageNum;
         
-        if (prevBtn) prevBtn.disabled = currentPage === 1;
-        if (nextBtn) nextBtn.disabled = currentPage === totalPages;
-        
-        if (homeBtn) {
-            homeBtn.style.display = (currentPage === totalPages) ? 'inline-block' : 'none';
-        }
+        // 更新导航按钮
+        updateNavButtons();
         
         const indicator = document.getElementById('indicator');
         if (indicator) indicator.innerText = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
         
         window.scrollTo(0, 0);
         
-        // ★ 最后一页特殊处理：仅当效果尚未触发过时才执行
+        // 最后一页特殊处理：仅当效果尚未触发过时才执行
         if (pageNum === totalPages && bgm && audioStarted && !lastPageEffectTriggered) {
             // 标记已触发，第二次及以后不会再进入
             lastPageEffectTriggered = true;
