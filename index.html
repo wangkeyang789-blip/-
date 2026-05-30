@@ -286,40 +286,9 @@
     const totalPages = 7;
     let lastPageMusicTimer = null;  // 用于存储最后一页音乐恢复的定时器
 
-    // 设置音乐音量
+    // 设置音乐音量和默认进度
     if (bgm) {
         bgm.volume = 0.3;
-    }
-
-    // 淡入音乐（从当前音量逐渐恢复到0.3）
-    function fadeInMusic(duration = 2000) {
-        if (!bgm) return;
-        
-        // 确保音乐在播放状态
-        if (bgm.paused) {
-            bgm.play().catch(e => console.log("播放失败", e));
-        }
-        
-        const targetVolume = 0.3;
-        const startVolume = bgm.volume;
-        
-        // 如果音量已经是目标值或音乐未启动，直接返回
-        if (startVolume >= targetVolume - 0.01) return;
-        
-        const stepTime = 50;
-        const steps = duration / stepTime;
-        let currentStep = 0;
-        
-        const interval = setInterval(() => {
-            currentStep++;
-            const newVolume = startVolume + (targetVolume - startVolume) * (currentStep / steps);
-            bgm.volume = Math.min(newVolume, targetVolume);
-            
-            if (currentStep >= steps) {
-                bgm.volume = targetVolume;
-                clearInterval(interval);
-            }
-        }, stepTime);
     }
 
     // 显示指定页面
@@ -351,7 +320,7 @@
         // 滚动到顶部
         window.scrollTo(0, 0);
         
-        // 翻到最后一页的特殊处理：音乐戛然而止 → 等待4秒 → 淡入恢复
+        // 翻到最后一页的特殊处理：音乐戛然而止 → 沉默4秒 → 从第51秒开始播放
         if (pageNum === totalPages && bgm && audioStarted) {
             // 清除之前的定时器，避免重复触发
             if (lastPageMusicTimer) {
@@ -365,13 +334,12 @@
                 isPlaying = false;
                 if (musicToggle) musicToggle.textContent = '播放音乐';
                 
-                // 4秒后淡入恢复播放
+                // 4秒后从第51秒开始播放
                 lastPageMusicTimer = setTimeout(() => {
-                    // 从头开始播放（营造"重启"感）
-                    bgm.currentTime = 0;
-                    bgm.volume = 0;
+                    // 设置播放位置为第51秒
+                    bgm.currentTime = 51;
+                    bgm.volume = 0.3;
                     bgm.play().then(() => {
-                        fadeInMusic(2000);
                         isPlaying = true;
                         if (musicToggle) musicToggle.textContent = '暂停音乐';
                         audioStarted = true;
@@ -424,6 +392,7 @@
     function startReading() {
         // 播放音乐
         if (bgm) {
+            bgm.currentTime = 0;  // 从头开始
             bgm.volume = 0.3;
             bgm.play().then(() => {
                 audioStarted = true;
