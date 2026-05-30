@@ -284,10 +284,42 @@
     let audioStarted = false;
     let currentPage = 1;
     const totalPages = 7;
+    let lastPageMusicTimer = null;  // 用于存储最后一页音乐恢复的定时器
 
     // 设置音乐音量
     if (bgm) {
         bgm.volume = 0.3;
+    }
+
+    // 淡入音乐（从当前音量逐渐恢复到0.3）
+    function fadeInMusic(duration = 2000) {
+        if (!bgm) return;
+        
+        // 确保音乐在播放状态
+        if (bgm.paused) {
+            bgm.play().catch(e => console.log("播放失败", e));
+        }
+        
+        const targetVolume = 0.3;
+        const startVolume = bgm.volume;
+        
+        // 如果音量已经是目标值或音乐未启动，直接返回
+        if (startVolume >= targetVolume - 0.01) return;
+        
+        const stepTime = 50;
+        const steps = duration / stepTime;
+        let currentStep = 0;
+        
+        const interval = setInterval(() => {
+            currentStep++;
+            const newVolume = startVolume + (targetVolume - startVolume) * (currentStep / steps);
+            bgm.volume = Math.min(newVolume, targetVolume);
+            
+            if (currentStep >= steps) {
+                bgm.volume = targetVolume;
+                clearInterval(interval);
+            }
+        }, stepTime);
     }
 
     // 显示指定页面
@@ -319,11 +351,34 @@
         // 滚动到顶部
         window.scrollTo(0, 0);
         
-        // 翻到最后一页时停止音乐
-        if (pageNum === totalPages && bgm && isPlaying) {
-            bgm.pause();
-            isPlaying = false;
-            if (musicToggle) musicToggle.textContent = '播放音乐';
+        // 翻到最后一页的特殊处理：音乐戛然而止 → 等待4秒 → 淡入恢复
+        if (pageNum === totalPages && bgm && audioStarted) {
+            // 清除之前的定时器，避免重复触发
+            if (lastPageMusicTimer) {
+                clearTimeout(lastPageMusicTimer);
+                lastPageMusicTimer = null;
+            }
+            
+            // 音乐戛然而止（瞬间暂停）
+            if (!bgm.paused && isPlaying) {
+                bgm.pause();
+                isPlaying = false;
+                if (musicToggle) musicToggle.textContent = '播放音乐';
+                
+                // 4秒后淡入恢复播放
+                lastPageMusicTimer = setTimeout(() => {
+                    // 从头开始播放（营造"重启"感）
+                    bgm.currentTime = 0;
+                    bgm.volume = 0;
+                    bgm.play().then(() => {
+                        fadeInMusic(2000);
+                        isPlaying = true;
+                        if (musicToggle) musicToggle.textContent = '暂停音乐';
+                        audioStarted = true;
+                    }).catch(e => console.log("播放失败", e));
+                    lastPageMusicTimer = null;
+                }, 4000);
+            }
         }
         
         // 翻页音效
@@ -369,6 +424,7 @@
     function startReading() {
         // 播放音乐
         if (bgm) {
+            bgm.volume = 0.3;
             bgm.play().then(() => {
                 audioStarted = true;
                 if (musicToggle) musicToggle.textContent = '暂停音乐';
@@ -397,15 +453,22 @@
     if (musicToggle) {
         musicToggle.addEventListener('click', () => {
             if (isPlaying) {
+                // 如果正在播放，停止
+                if (lastPageMusicTimer) {
+                    clearTimeout(lastPageMusicTimer);
+                    lastPageMusicTimer = null;
+                }
                 bgm.pause();
                 musicToggle.textContent = '播放音乐';
             } else {
+                // 如果暂停，恢复播放
                 if (!audioStarted) {
                     bgm.play().catch(e => console.log);
                     audioStarted = true;
                 } else {
                     bgm.play().catch(e => console.log);
                 }
+                bgm.volume = 0.3;
                 musicToggle.textContent = '暂停音乐';
             }
             isPlaying = !isPlaying;
