@@ -294,6 +294,9 @@
     let lastPageMusicTimer = null;      // 最后一页恢复定时器
     let volumeFadeTimer = null;         // 音量淡入定时器
     let highVolumeTimer = null;         // 高音量持续时间定时器
+    
+    // ★ 新增：标记最后一页的“特殊效果”是否已经触发过
+    let lastPageEffectTriggered = false;
 
     // 设置音乐默认音量
     if (bgm) {
@@ -304,7 +307,6 @@
     function fadeVolume(fromVol, toVol, duration, callback) {
         if (!bgm) return;
         
-        // 清除之前的淡变定时器
         if (volumeFadeTimer) {
             clearInterval(volumeFadeTimer);
             volumeFadeTimer = null;
@@ -337,35 +339,33 @@
     function showPage(pageNum) {
         if (pageNum < 1 || pageNum > totalPages) return;
         
-        // 隐藏所有页面
         for (let i = 1; i <= totalPages; i++) {
             const page = document.getElementById(`p${i}`);
             if (page) page.classList.remove('active');
         }
         
-        // 显示当前页面
         const currentPageEl = document.getElementById(`p${pageNum}`);
         if (currentPageEl) currentPageEl.classList.add('active');
         
         currentPage = pageNum;
         
-        // 更新按钮状态
         if (prevBtn) prevBtn.disabled = currentPage === 1;
         if (nextBtn) nextBtn.disabled = currentPage === totalPages;
         
-        // 只在最后一页显示“回到首页”按钮
         if (homeBtn) {
             homeBtn.style.display = (currentPage === totalPages) ? 'inline-block' : 'none';
         }
         
-        // 更新指示器
         const indicator = document.getElementById('indicator');
         if (indicator) indicator.innerText = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
         
         window.scrollTo(0, 0);
         
-        // ★ 最后一页：音乐戛然而止 → 沉默4秒 → 从第52秒以0.5音量播放 → 2秒后淡入到0.3
-        if (pageNum === totalPages && bgm && audioStarted) {
+        // ★ 最后一页特殊处理：仅当效果尚未触发过时才执行
+        if (pageNum === totalPages && bgm && audioStarted && !lastPageEffectTriggered) {
+            // 标记已触发，第二次及以后不会再进入
+            lastPageEffectTriggered = true;
+            
             // 清除所有定时器
             if (lastPageMusicTimer) clearTimeout(lastPageMusicTimer);
             if (highVolumeTimer) clearTimeout(highVolumeTimer);
@@ -383,9 +383,7 @@
                 
                 // 4秒后开始播放
                 lastPageMusicTimer = setTimeout(() => {
-                    // 跳到第52秒
                     bgm.currentTime = 52;
-                    // 以音量0.5开始播放
                     bgm.volume = 0.5;
                     bgm.play().then(() => {
                         isPlaying = true;
@@ -444,12 +442,10 @@
         }
     }
 
-    // 绑定事件
     if (nextBtn) nextBtn.addEventListener('click', nextPage);
     if (prevBtn) prevBtn.addEventListener('click', prevPage);
     if (homeBtn) homeBtn.addEventListener('click', goHome);
 
-    // 开始阅读
     function startReading() {
         if (bgm) {
             bgm.currentTime = 0;
@@ -470,7 +466,6 @@
         }, 1000);
     }
 
-    // 音乐按钮控制
     if (musicToggle) {
         musicToggle.addEventListener('click', () => {
             if (isPlaying) {
