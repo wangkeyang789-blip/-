@@ -338,14 +338,14 @@
                 lastPageMusicTimer = setTimeout(() => {
                     // 设置播放位置为第51秒
                     bgm.currentTime = 51;
-                    bgm.volume = 0.3;
+                    bgm.volume = 0.5;
                     bgm.play().then(() => {
                         isPlaying = true;
                         if (musicToggle) musicToggle.textContent = '暂停音乐';
                         audioStarted = true;
                     }).catch(e => console.log("播放失败", e));
                     lastPageMusicTimer = null;
-                }, 4000);
+                }, 3000);
             }
         }
         
