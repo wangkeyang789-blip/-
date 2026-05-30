@@ -146,6 +146,7 @@
             display: flex;
             justify-content: space-between;
             margin-top: 80px;
+            gap: 12px;
         }
         button {
             background: transparent;
@@ -164,6 +165,10 @@
         button:disabled {
             opacity: 0.3;
             cursor: not-allowed;
+        }
+        /* 回到首页按钮默认隐藏，只在最后一页显示 */
+        #homeBtn {
+            display: none;
         }
         .page-indicator {
             text-align: center;
@@ -263,6 +268,7 @@
 
     <div class="nav">
         <button id="prev">上一页</button>
+        <button id="homeBtn">回到首页</button>
         <button id="next">下一页</button>
     </div>
     <div class="page-indicator" id="indicator">第 1 页 / 共 7 页</div>
@@ -279,16 +285,51 @@
     const musicToggle = document.getElementById('musicToggle');
     const prevBtn = document.getElementById('prev');
     const nextBtn = document.getElementById('next');
+    const homeBtn = document.getElementById('homeBtn');
     
     let isPlaying = true;
     let audioStarted = false;
     let currentPage = 1;
     const totalPages = 7;
-    let lastPageMusicTimer = null;  // 用于存储最后一页音乐恢复的定时器
+    let lastPageMusicTimer = null;      // 最后一页恢复定时器
+    let volumeFadeTimer = null;         // 音量淡入定时器
 
-    // 设置音乐音量和默认进度
+    // 设置音乐默认音量
     if (bgm) {
         bgm.volume = 0.3;
+    }
+
+    // 音量淡入/淡出函数
+    function fadeVolume(fromVol, toVol, duration, callback) {
+        if (!bgm) return;
+        
+        // 清除之前的淡变定时器
+        if (volumeFadeTimer) {
+            clearInterval(volumeFadeTimer);
+            volumeFadeTimer = null;
+        }
+        
+        const startVol = fromVol;
+        const targetVol = toVol;
+        const stepTime = 50; // 每步50ms
+        const steps = duration / stepTime;
+        let currentStep = 0;
+        
+        bgm.volume = startVol;
+        
+        const interval = setInterval(() => {
+            currentStep++;
+            const newVol = startVol + (targetVol - startVol) * (currentStep / steps);
+            bgm.volume = Math.min(Math.max(newVol, 0), 1);
+            
+            if (currentStep >= steps) {
+                bgm.volume = targetVol;
+                clearInterval(interval);
+                if (callback) callback();
+            }
+        }, stepTime);
+        
+        volumeFadeTimer = interval;
     }
 
     // 显示指定页面
@@ -313,6 +354,15 @@
         if (prevBtn) prevBtn.disabled = currentPage === 1;
         if (nextBtn) nextBtn.disabled = currentPage === totalPages;
         
+        // ★ 关键：只在最后一页显示“回到首页”按钮
+        if (homeBtn) {
+            if (currentPage === totalPages) {
+                homeBtn.style.display = 'inline-block';
+            } else {
+                homeBtn.style.display = 'none';
+            }
+        }
+        
         // 更新指示器
         const indicator = document.getElementById('indicator');
         if (indicator) indicator.innerText = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
@@ -320,12 +370,16 @@
         // 滚动到顶部
         window.scrollTo(0, 0);
         
-        // 翻到最后一页的特殊处理：音乐戛然而止 → 沉默4秒 → 从第51秒开始播放
+        // 翻到最后一页的特殊处理
         if (pageNum === totalPages && bgm && audioStarted) {
-            // 清除之前的定时器，避免重复触发
+            // 清除之前的定时器和淡变
             if (lastPageMusicTimer) {
                 clearTimeout(lastPageMusicTimer);
                 lastPageMusicTimer = null;
+            }
+            if (volumeFadeTimer) {
+                clearInterval(volumeFadeTimer);
+                volumeFadeTimer = null;
             }
             
             // 音乐戛然而止（瞬间暂停）
@@ -334,18 +388,27 @@
                 isPlaying = false;
                 if (musicToggle) musicToggle.textContent = '播放音乐';
                 
-                // 4秒后从第51秒开始播放
+                // 4秒后开始播放
                 lastPageMusicTimer = setTimeout(() => {
-                    // 设置播放位置为第51秒
-                    bgm.currentTime = 51;
+                    // 设置播放位置（从头开始）
+                    bgm.currentTime = 0;
+                    // 先以音量0.5开始播放
                     bgm.volume = 0.5;
                     bgm.play().then(() => {
                         isPlaying = true;
                         if (musicToggle) musicToggle.textContent = '暂停音乐';
                         audioStarted = true;
+                        
+                        // 播放2秒后，用2秒时间淡入到正常音量0.3
+                        setTimeout(() => {
+                            if (bgm && !bgm.paused) {
+                                fadeVolume(0.5, 0.3, 2000);
+                            }
+                        }, 2000);
+                        
                     }).catch(e => console.log("播放失败", e));
                     lastPageMusicTimer = null;
-                }, 3000);
+                }, 4000);
             }
         }
         
@@ -384,15 +447,23 @@
         }
     }
 
+    // 回到首页（第1页），音乐不受影响
+    function goHome() {
+        if (currentPage !== 1) {
+            showPage(1);
+        }
+    }
+
     // 绑定翻页按钮事件
     if (nextBtn) nextBtn.addEventListener('click', nextPage);
     if (prevBtn) prevBtn.addEventListener('click', prevPage);
+    if (homeBtn) homeBtn.addEventListener('click', goHome);
 
     // 开始阅读的函数
     function startReading() {
         // 播放音乐
         if (bgm) {
-            bgm.currentTime = 0;  // 从头开始
+            bgm.currentTime = 0;
             bgm.volume = 0.3;
             bgm.play().then(() => {
                 audioStarted = true;
@@ -426,6 +497,10 @@
                 if (lastPageMusicTimer) {
                     clearTimeout(lastPageMusicTimer);
                     lastPageMusicTimer = null;
+                }
+                if (volumeFadeTimer) {
+                    clearInterval(volumeFadeTimer);
+                    volumeFadeTimer = null;
                 }
                 bgm.pause();
                 musicToggle.textContent = '播放音乐';
