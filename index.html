@@ -404,7 +404,7 @@
                 // 4秒后开始播放
                 lastPageMusicTimer = setTimeout(() => {
                     bgm.currentTime = 52;
-                    bgm.volume = 0.5;
+                    bgm.volume = 0.7;
                     bgm.play().then(() => {
                         isPlaying = true;
                         if (musicToggle) musicToggle.textContent = '暂停音乐';
@@ -413,7 +413,7 @@
                         // 播放2秒后，用2秒时间淡入到正常音量0.3
                         highVolumeTimer = setTimeout(() => {
                             if (bgm && !bgm.paused) {
-                                fadeVolume(0.5, 0.3, 2000);
+                                fadeVolume(0.7, 0.3, 2000);
                             }
                             highVolumeTimer = null;
                         }, 2000);
